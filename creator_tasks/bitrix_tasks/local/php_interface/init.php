@@ -1,28 +1,20 @@
 <?php
 
-use Bitrix\Main\Loader;
+require dirname(__FILE__) . '/constants.php';
+require dirname(__FILE__) . '/autoload.php';
+require dirname(__FILE__) . '/event_handler.php';
 
-AddEventHandler("sale", "OnSaleStatusOrder", "OrderComplete");
-
-
-function OrderComplete($orderID, &$arFields)
+// обёртка для print_r() и var_dump()
+function print_p($val, $name = 'Содержимое переменной', $mode = false)
 {
-    $minPrice = 5000;
-    Loader::includeModule("sale");
-    if ($arFields == 'F') {
-        $order = \Bitrix\Sale\Order::load($orderID);
-        $orderUser = $order->getUserId();
-        $orderTotalPrice = $order->getPrice();
-        if ($orderTotalPrice > $minPrice) {
-            $bonusPercent = $orderTotalPrice * 5 / 100;
+    global $USER;
+    if ($USER->IsAdmin()) {
+        echo '<pre>' . (!empty($name) ? $name . ': ' : '');
+        if ($mode) {
+            var_dump($val);
+        } else {
+            print_r($val);
         }
-        CSaleUserAccount::UpdateAccount(
-            $orderUser,
-            $bonusPercent,
-            "RUB",
-            false,
-            $orderID,
-            false
-        );
+        echo '</pre>';
     }
 }
